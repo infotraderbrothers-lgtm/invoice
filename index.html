@@ -4,353 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice - Trader Brothers Ltd</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://js.stripe.com/v3/"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-
-    .invoice-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #333;
-    }
-
-    .company-info {
-      flex: 1;
-    }
-
-    .company-name {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .company-name .highlight {
-      background: linear-gradient(135deg, #bc9c22, #d4af37);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .company-details {
-      font-size: 11px;
-      line-height: 1.6;
-      color: #666;
-    }
-
-    .logo {
-      width: 120px;
-      height: auto;
-    }
-
-    .invoice-banner {
-      background: linear-gradient(135deg, #bc9c22, #d4af37);
-      padding: 15px 20px;
-      margin-bottom: 25px;
-      display: inline-block;
-      font-weight: bold;
-      font-size: 16px;
-      color: white;
-    }
-
-    .info-section {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-    }
-
-    .client-info {
-      flex: 1;
-    }
-
-    .client-info h3 {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 8px;
-    }
-
-    .client-info p {
-      font-size: 13px;
-      line-height: 1.5;
-      color: #333;
-    }
-
-    .invoice-details {
-      flex: 0 0 250px;
-    }
-
-    .details-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .details-table td {
-      padding: 8px 10px;
-      font-size: 13px;
-    }
-
-    .detail-label {
-      color: #666;
-      text-align: left;
-      width: 120px;
-    }
-
-    .detail-value {
-      font-weight: bold;
-      color: #333;
-      text-align: left;
-    }
-
-    .milestone-section {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 25px;
-      margin-bottom: 30px;
-      position: relative;
-      transition: all 0.3s;
-    }
-
-    .milestone-section:hover {
-      border-color: #bc9c22;
-      box-shadow: 0 4px 12px rgba(188, 156, 34, 0.1);
-    }
-
-    .milestone-number {
-      position: absolute;
-      top: -15px;
-      left: 20px;
-      background: linear-gradient(135deg, #bc9c22, #d4af37);
-      color: white;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .milestone-content {
-      padding-left: 30px;
-    }
-
-    .milestone-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .milestone-description {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .items-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 25px 0;
-    }
-
-    .items-table thead {
-      background: #f9f9f9;
-      border-bottom: 2px solid #333;
-    }
-
-    .items-table th {
-      padding: 12px 15px;
-      text-align: left;
-      font-size: 12px;
-      color: #333;
-      font-weight: bold;
-    }
-
-    .items-table th.right-align {
-      text-align: right;
-    }
-
-    .items-table td {
-      padding: 15px;
-      font-size: 13px;
-      color: #666;
-      border-bottom: 1px solid #eee;
-    }
-
-    .items-table td.right-align {
-      text-align: right;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .items-table tbody tr:last-child td {
-      border-bottom: 2px solid #333;
-    }
-
-    .totals-section {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-
-    .totals-table {
-      width: 300px;
-    }
-
-    .totals-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .totals-row.subtotal {
-      border-top: 1px solid #eee;
-      padding-top: 12px;
-    }
-
-    .totals-row.total {
-      border-top: 2px solid #333;
-      margin-top: 10px;
-      padding-top: 15px;
-      font-weight: bold;
-      font-size: 16px;
-      color: #333;
-    }
-
-    .totals-row.total .amount {
-      background: linear-gradient(135deg, #bc9c22, #d4af37);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 20px;
-    }
-
-    .payment-section {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 40px;
-      margin-top: 40px;
-      text-align: center;
-      transition: all 0.3s;
-    }
-
-    .payment-section:hover {
-      border-color: #bc9c22;
-      box-shadow: 0 4px 12px rgba(188, 156, 34, 0.1);
-    }
-
-    .payment-section h3 {
-      font-size: 20px;
-      margin-bottom: 10px;
-      color: #333;
-      font-weight: bold;
-    }
-
-    .payment-section p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 25px;
-    }
-
-    .pay-now-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #bc9c22, #d4af37);
-      color: white;
-      padding: 18px 60px;
-      font-size: 18px;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(188, 156, 34, 0.3);
-      border: none;
-      cursor: pointer;
-    }
-
-    .pay-now-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(188, 156, 34, 0.4);
-      background: linear-gradient(135deg, #a88b1e, #c29d2f);
-    }
-
-    .pay-now-button:active {
-      transform: translateY(0);
-    }
-
-    .payment-due-amount {
-      font-size: 32px;
-      font-weight: bold;
-      color: #333;
-      margin: 15px 0 20px 0;
-    }
-
-    .payment-terms {
-      font-size: 12px;
-      color: #666;
-      margin-top: 20px;
-    }
-
-    .footer-note {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #ddd;
-      text-align: center;
-      font-size: 11px;
-      color: #666;
-      font-style: italic;
-    }
-
-    .thank-you {
-      margin-top: 15px;
-      font-weight: bold;
-      color: #333;
-      font-size: 12px;
-    }
-
-    @media print {
-      body {
-        background: white;
-        padding: 0;
-      }
-      
-      .invoice-container {
-        box-shadow: none;
-        padding: 20px;
-      }
-
-      .payment-section {
-        display: none;
-      }
-    }
-  </style>
 </head>
 <body>
   <div class="invoice-container">
@@ -459,18 +114,110 @@
       </div>
     </div>
 
-    <!-- Payment Section with Button -->
+    <!-- Payment Section -->
     <div class="payment-section">
-      <h3>Ready to Pay?</h3>
-      <p>Click the button below to securely pay your invoice online</p>
-      <div class="payment-due-amount">£5,522.59</div>
-      <a href="#payment" class="pay-now-button" id="payNowButton">PAY NOW</a>
-      <div class="payment-terms">Payment due by 27/01/2025 • Invoice #INV-2025-001</div>
-      
+      <div id="paymentInitial">
+        <h3>Ready to Pay?</h3>
+        <p>Click the button below to securely pay your invoice online</p>
+        <div class="payment-due-amount">£5,522.59</div>
+        <button class="pay-now-button" id="payNowButton">PAY NOW</button>
+        <div class="payment-terms">Payment due by 27/01/2025 • Invoice #INV-2025-001</div>
+      </div>
+
+      <!-- Payment Form (Hidden Initially) -->
+      <div class="payment-form-container" id="paymentFormContainer">
+        <div class="payment-form">
+          <h3 style="text-align: center; margin-bottom: 20px; color: #333;">Complete Your Payment</h3>
+          
+          <div class="form-group">
+            <label for="cardholderName">Cardholder Name</label>
+            <input type="text" id="cardholderName" placeholder="John Smith" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cardholderEmail">Email Address</label>
+            <input type="email" id="cardholderEmail" placeholder="john@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="card-element">Card Details</label>
+            <div id="card-element"></div>
+            <div id="card-errors"></div>
+          </div>
+
+          <button class="submit-payment-button" id="submitPayment">
+            Pay £5,522.59
+          </button>
+
+          <div class="secure-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            Secured by Stripe - Your payment information is encrypted and secure
+          </div>
+
+          <a class="cancel-payment" id="cancelPayment">Cancel and return to invoice</a>
+        </div>
+      </div>
+
+      <!-- Success Message (Hidden Initially) -->
+      <div class="success-message" id="successMessage">
+        <h3>✓ Payment Successful!</h3>
+        <p>Thank you for your payment. A confirmation email has been sent to your email address.</p>
+        <p style="margin-top: 15px; font-size: 13px;"><strong>Transaction ID:</strong> <span id="transactionId"></span></p>
+      </div>
       <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid #e0e0e0;">
         <p style="font-size: 13px; color: #333; margin-bottom: 12px; font-weight: bold;">Payment Information</p>
         <p style="font-size: 12px; color: #666; margin-bottom: 8px;"><strong>Payment Terms:</strong> Due within 7 days of invoice date (27/01/2025)</p>
         <p style="font-size: 12px; color: #666; margin-bottom: 0;"><strong>Payment Methods:</strong> Bank Transfer (preferred), Cheque, or Card (surcharge may apply)</p>
+      </div>
+    </div>
+
+    <!-- Payment Success Overlay -->
+    <div class="payment-overlay" id="paymentOverlay">
+      <!-- Big Green Tick (shown first) -->
+      <div id="checkmarkContainer">
+        <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="success-checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="success-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+
+      <!-- Thank You Screen (shown after tick animation) -->
+      <div class="thank-you-screen" id="thankYouScreen">
+        <img src="https://github.com/infotraderbrothers-lgtm/traderbrothers-assets-logo/blob/main/Trader%20Brothers.png?raw=true" alt="Trader Brothers Logo" class="thank-you-logo">
+        
+        <div class="thank-you-company-name">TR<span class="highlight">A</span>DER BROTHERS LTD</div>
+        
+        <div class="thank-you-title">Payment Successful!</div>
+        
+        <div class="thank-you-message">
+          Thank you for your payment. Your transaction has been completed successfully and a confirmation email has been sent to your inbox.
+        </div>
+
+        <div class="payment-details-box">
+          <h4>Payment Details</h4>
+          <div class="detail-row">
+            <span class="detail-label">Invoice Number:</span>
+            <span class="detail-value">INV-2025-001</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Transaction ID:</span>
+            <span class="detail-value" id="transactionIdDisplay"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Payment Date:</span>
+            <span class="detail-value" id="paymentDate"></span>
+          </div>
+          <div class="detail-row highlight">
+            <span class="detail-label">Amount Paid:</span>
+            <span class="detail-value">£5,522.59</span>
+          </div>
+        </div>
+
+        <button class="close-button" id="closeOverlay">Close</button>
+
+        <div class="confirmation-note">
+          A receipt has been sent to your email address
+        </div>
       </div>
     </div>
 
@@ -482,51 +229,6 @@
     </div>
   </div>
 
-  <script>
-    // STRIPE CONFIGURATION
-    // Replace 'YOUR_PUBLISHABLE_KEY' with your actual Stripe publishable key
-    // Find this in your Stripe Dashboard: https://dashboard.stripe.com/apikeys
-    const stripe = Stripe('YOUR_PUBLISHABLE_KEY');
-
-    // Get the Pay Now button
-    const payButton = document.getElementById('payNowButton');
-
-    payButton.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      // STEP 1: Create a Checkout Session on your server
-      // You'll need to create a server endpoint that creates a Stripe Checkout Session
-      // This example assumes you have an endpoint at '/create-checkout-session'
-      
-      try {
-        const response = await fetch('/create-checkout-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount: 552259, // Amount in pence (£5,522.59)
-            invoiceNumber: 'INV-2025-001',
-            customerEmail: 'customer@example.com', // Optional: pre-fill customer email
-          }),
-        });
-
-        const session = await response.json();
-
-        // STEP 2: Redirect to Stripe Checkout (this creates the popup overlay)
-        const result = await stripe.redirectToCheckout({
-          sessionId: session.id,
-        });
-
-        if (result.error) {
-          // Handle any errors
-          alert(result.error.message);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Payment initialization failed. Please try again.');
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
