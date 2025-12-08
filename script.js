@@ -6,14 +6,12 @@ const stripe = Stripe('pk_test_51ScASNK7DEVkPpUa18czw2DHwAQi6MtN3u5dB61k6XspBxUg
 // ========================================
 // BACKEND CONFIGURATION
 // ========================================
-// Replace this with your Render backend URL after deployment
-// Example: 'https://trader-brothers-backend.onrender.com/create-payment-intent'
-const BACKEND_URL = 'https://your-backend-name.onrender.com/create-payment-intent';
+const BACKEND_URL = 'https://invoice-backend-vmph.onrender.com/create-payment-intent';
 
 // Create an instance of Stripe Elements
 const elements = stripe.elements();
 
-// Create and mount the card element
+// Create and mount the card element with UK-specific settings
 const cardElement = elements.create('card', {
   style: {
     base: {
@@ -95,6 +93,8 @@ cardElement.addEventListener('change', function(event) {
 submitPayment.addEventListener('click', async function(e) {
   e.preventDefault();
 
+  // Backend URL is now configured and ready to use
+
   // Validate inputs
   if (!cardholderName.value.trim()) {
     cardErrors.textContent = 'Please enter the cardholder name';
@@ -145,7 +145,7 @@ submitPayment.addEventListener('click', async function(e) {
     const { clientSecret } = await response.json();
 
     // ========================================
-    // STEP 2: Confirm the payment with Stripe
+    // STEP 2: Confirm the payment with Stripe (UK card payment)
     // ========================================
     const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
@@ -153,6 +153,9 @@ submitPayment.addEventListener('click', async function(e) {
         billing_details: {
           name: cardholderName.value,
           email: cardholderEmail.value,
+          address: {
+            country: 'GB', // United Kingdom
+          },
         },
       },
     });
@@ -171,7 +174,7 @@ submitPayment.addEventListener('click', async function(e) {
     
     // Show user-friendly error message
     if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-      cardErrors.textContent = '⚠️ Unable to connect to payment server. Please check your backend URL is correct.';
+      cardErrors.textContent = '⚠️ Unable to connect to payment server. Please ensure your backend is deployed to Render.com';
       console.error(`
 ========================================
 CONNECTION ERROR
@@ -179,13 +182,21 @@ CONNECTION ERROR
 
 Cannot connect to backend at: ${BACKEND_URL}
 
-Please ensure:
-1. Your Render backend is deployed and running
-2. The BACKEND_URL variable is set to your correct Render URL
-3. Your backend has CORS enabled for your domain
-4. Your Render service is not sleeping (free tier sleeps after inactivity)
+COMMON ISSUES:
+1. Backend not deployed to Render.com yet
+2. BACKEND_URL still set to placeholder
+3. Render service is sleeping (free tier - wait 30 seconds)
+4. CORS not enabled on backend
 
-Check your Render dashboard: https://dashboard.render.com
+GitHub Pages URL won't work - you need Render.com!
+
+Setup Guide:
+1. Go to https://render.com
+2. Create "Web Service"
+3. Upload server.js and package.json
+4. Get your Render URL
+5. Update BACKEND_URL in this file
+========================================
       `);
     } else {
       cardErrors.textContent = err.message || 'Payment failed. Please try again or contact support.';
@@ -204,7 +215,7 @@ function handleSuccessfulPayment(transactionId) {
   paymentFormContainer.classList.remove('active');
   
   // Show the overlay with checkmark
-  paymentOverlay.classList.add('active');
+  paymentOverlay.classList.add('active';
   checkmarkContainer.style.display = 'flex';
   
   // After 2 seconds, transition to thank you screen
@@ -215,7 +226,7 @@ function handleSuccessfulPayment(transactionId) {
     // Set the payment details
     document.getElementById('transactionIdDisplay').textContent = transactionId;
     
-    // Set current date
+    // Set current date (UK format)
     const now = new Date();
     const formattedDate = now.toLocaleDateString('en-GB', {
       day: '2-digit',
