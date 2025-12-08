@@ -1,15 +1,14 @@
 // ========================================
 // STRIPE CONFIGURATION
 // ========================================
-// Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
-const stripe = Stripe('pk_test_51QWD4cCiMXC9wKEJQB2h3PjPRf7Nn8rbPK6dqU21yYCfzqIDiznJAXlc1dUIgXwYRzONnJn6RXQ3GgVXkzQbKMtv00HjWGihbh');
+const stripe = Stripe('pk_test_51ScASNK7DEVkPpUa18czw2DHwAQi6MtN3u5dB61k6XspBxUggUWX9gFu3oSBqRqqFkyYnsp9rUehZ1psWL9as0Vs002OwqD4Ue');
 
 // ========================================
 // BACKEND CONFIGURATION
 // ========================================
 // Replace this with your Render backend URL after deployment
-// Example: 'https://your-invoice-backend.onrender.com/create-payment-intent'
-const BACKEND_URL = 'https://your-invoice-backend.onrender.com/create-payment-intent';
+// Example: 'https://trader-brothers-backend.onrender.com/create-payment-intent'
+const BACKEND_URL = 'https://your-backend-name.onrender.com/create-payment-intent';
 
 // Create an instance of Stripe Elements
 const elements = stripe.elements();
