@@ -1,9 +1,15 @@
 // ========================================
 // STRIPE CONFIGURATION
 // ========================================
-// IMPORTANT: Replace 'pk_test_...' with your actual Stripe publishable key
-// Get your key from: https://dashboard.stripe.com/apikeys
+// Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
 const stripe = Stripe('pk_test_51QWD4cCiMXC9wKEJQB2h3PjPRf7Nn8rbPK6dqU21yYCfzqIDiznJAXlc1dUIgXwYRzONnJn6RXQ3GgVXkzQbKMtv00HjWGihbh');
+
+// ========================================
+// BACKEND CONFIGURATION
+// ========================================
+// Replace this with your Render backend URL after deployment
+// Example: 'https://your-invoice-backend.onrender.com/create-payment-intent'
+const BACKEND_URL = 'https://your-invoice-backend.onrender.com/create-payment-intent';
 
 // Create an instance of Stripe Elements
 const elements = stripe.elements();
@@ -32,7 +38,6 @@ const paymentInitial = document.getElementById('paymentInitial');
 const submitPayment = document.getElementById('submitPayment');
 const cancelPayment = document.getElementById('cancelPayment');
 const cardErrors = document.getElementById('card-errors');
-const successMessage = document.getElementById('successMessage');
 const cardholderName = document.getElementById('cardholderName');
 const cardholderEmail = document.getElementById('cardholderEmail');
 const paymentOverlay = document.getElementById('paymentOverlay');
@@ -64,6 +69,7 @@ cancelPayment.addEventListener('click', function() {
   setTimeout(() => {
     paymentInitial.style.display = 'block';
     cardElement.unmount();
+    cardErrors.textContent = '';
   }, 500);
 });
 
@@ -72,9 +78,6 @@ closeOverlay.addEventListener('click', function() {
   paymentOverlay.classList.remove('active');
   checkmarkContainer.style.display = 'flex';
   thankYouScreen.classList.remove('active');
-  
-  // Optionally refresh the page or update invoice status
-  // location.reload();
 });
 
 // Handle real-time validation errors from the card Element
@@ -86,7 +89,10 @@ cardElement.addEventListener('change', function(event) {
   }
 });
 
-// Handle payment submission
+// ========================================
+// PAYMENT SUBMISSION
+// ========================================
+
 submitPayment.addEventListener('click', async function(e) {
   e.preventDefault();
 
@@ -101,6 +107,13 @@ submitPayment.addEventListener('click', async function(e) {
     return;
   }
 
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cardholderEmail.value.trim())) {
+    cardErrors.textContent = 'Please enter a valid email address';
+    return;
+  }
+
   // Disable button and show loading state
   submitPayment.disabled = true;
   submitPayment.textContent = 'Processing...';
@@ -108,12 +121,10 @@ submitPayment.addEventListener('click', async function(e) {
 
   try {
     // ========================================
-    // STEP 1: Create Payment Intent on your server
+    // STEP 1: Create Payment Intent on your Render backend
     // ========================================
-    // You need to create a server endpoint that creates a Stripe Payment Intent
-    // This example assumes you have an endpoint at '/create-payment-intent'
     
-    const response = await fetch('/create-payment-intent', {
+    const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -126,6 +137,11 @@ submitPayment.addEventListener('click', async function(e) {
         customerName: cardholderName.value,
       }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to create payment intent');
+    }
 
     const { clientSecret } = await response.json();
 
@@ -149,36 +165,64 @@ submitPayment.addEventListener('click', async function(e) {
       submitPayment.textContent = 'Pay £5,522.59';
     } else if (paymentIntent.status === 'succeeded') {
       // Payment succeeded!
-      
-      // Hide the payment form
-      paymentFormContainer.classList.remove('active');
-      
-      // Show the overlay with checkmark
-      paymentOverlay.classList.add('active');
-      checkmarkContainer.style.display = 'flex';
-      
-      // After 2 seconds, transition to thank you screen
-      setTimeout(() => {
-        checkmarkContainer.style.display = 'none';
-        thankYouScreen.classList.add('active');
-        
-        // Set the payment details
-        document.getElementById('transactionIdDisplay').textContent = paymentIntent.id;
-        
-        // Set current date
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-        document.getElementById('paymentDate').textContent = formattedDate;
-      }, 2000);
+      handleSuccessfulPayment(paymentIntent.id);
     }
   } catch (err) {
-    console.error('Error:', err);
-    cardErrors.textContent = 'Payment failed. Please try again or contact support.';
+    console.error('Payment Error:', err);
+    
+    // Show user-friendly error message
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      cardErrors.textContent = '⚠️ Unable to connect to payment server. Please check your backend URL is correct.';
+      console.error(`
+========================================
+CONNECTION ERROR
+========================================
+
+Cannot connect to backend at: ${BACKEND_URL}
+
+Please ensure:
+1. Your Render backend is deployed and running
+2. The BACKEND_URL variable is set to your correct Render URL
+3. Your backend has CORS enabled for your domain
+4. Your Render service is not sleeping (free tier sleeps after inactivity)
+
+Check your Render dashboard: https://dashboard.render.com
+      `);
+    } else {
+      cardErrors.textContent = err.message || 'Payment failed. Please try again or contact support.';
+    }
+    
     submitPayment.disabled = false;
     submitPayment.textContent = 'Pay £5,522.59';
   }
 });
+
+// ========================================
+// SUCCESS HANDLER
+// ========================================
+function handleSuccessfulPayment(transactionId) {
+  // Hide the payment form
+  paymentFormContainer.classList.remove('active');
+  
+  // Show the overlay with checkmark
+  paymentOverlay.classList.add('active');
+  checkmarkContainer.style.display = 'flex';
+  
+  // After 2 seconds, transition to thank you screen
+  setTimeout(() => {
+    checkmarkContainer.style.display = 'none';
+    thankYouScreen.classList.add('active');
+    
+    // Set the payment details
+    document.getElementById('transactionIdDisplay').textContent = transactionId;
+    
+    // Set current date
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    document.getElementById('paymentDate').textContent = formattedDate;
+  }, 2000);
+}
