@@ -7,6 +7,28 @@ const stripe = Stripe('pk_test_51ScASNK7DEVkPpUa18czw2DHwAQi6MtN3u5dB61k6XspBxUg
 // BACKEND CONFIGURATION
 // ========================================
 const BACKEND_URL = 'https://invoice-backend-vmph.onrender.com/create-payment-intent';
+const WARMUP_URL = 'https://invoice-backend-vmph.onrender.com/warmup';
+
+// ========================================
+// WARMUP FUNCTION - Wakes up Render backend on page load
+// ========================================
+function warmupBackend() {
+  console.log('🔥 Warming up payment server...');
+  fetch(WARMUP_URL)
+    .then(response => response.json())
+    .then(data => {
+      console.log('✅ Payment server ready:', data.status);
+    })
+    .catch(error => {
+      console.log('⚠️ Warmup request sent (server may be waking up)');
+    });
+}
+
+// Call warmup immediately when page loads
+warmupBackend();
+
+// Keep server warm with periodic pings every 5 minutes
+setInterval(warmupBackend, 5 * 60 * 1000);
 
 // Create an instance of Stripe Elements
 const elements = stripe.elements();
