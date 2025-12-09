@@ -215,7 +215,7 @@ function handleSuccessfulPayment(transactionId) {
   paymentFormContainer.classList.remove('active');
   
   // Show the overlay with checkmark
-  paymentOverlay.classList.add('active';
+  paymentOverlay.classList.add('active');
   checkmarkContainer.style.display = 'flex';
   
   // After 2 seconds, transition to thank you screen
