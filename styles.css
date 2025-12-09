@@ -470,11 +470,18 @@ body {
   display: flex;
 }
 
+#checkmarkContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
 /* Big Green Tick Animation */
 .success-checkmark {
   width: 150px;
   height: 150px;
-  margin: 0 auto;
   position: relative;
   animation: scaleIn 0.5s ease-out;
 }
@@ -521,14 +528,17 @@ body {
 /* Thank You Screen */
 .thank-you-screen {
   background: white;
-  border-radius: 12px;
-  padding: 60px 80px;
+  border-radius: 8px;
+  padding: 40px;
   text-align: center;
-  max-width: 600px;
+  max-width: 500px;
   width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   opacity: 0;
   transform: scale(0.8);
   transition: all 0.4s ease-out;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .thank-you-screen.active {
@@ -537,16 +547,16 @@ body {
 }
 
 .thank-you-logo {
-  width: 180px;
+  width: 100px;
   height: auto;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .thank-you-company-name {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .thank-you-company-name .highlight {
@@ -557,32 +567,32 @@ body {
 }
 
 .thank-you-title {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: bold;
   color: #27ae60;
-  margin: 25px 0 20px 0;
+  margin: 20px 0 15px 0;
 }
 
 .thank-you-message {
-  font-size: 18px;
+  font-size: 14px;
   color: #666;
   line-height: 1.6;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .payment-details-box {
   background: #f9f9f9;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  padding: 25px;
-  margin: 30px 0;
+  padding: 20px;
+  margin: 20px 0;
   text-align: left;
 }
 
 .payment-details-box h4 {
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   text-align: center;
   font-weight: bold;
 }
@@ -590,8 +600,8 @@ body {
 .detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  font-size: 14px;
+  padding: 8px 0;
+  font-size: 13px;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -601,9 +611,10 @@ body {
 
 .detail-row.highlight {
   font-weight: bold;
-  font-size: 16px;
-  padding-top: 15px;
+  font-size: 14px;
+  padding-top: 12px;
   border-top: 2px solid #333;
+  margin-top: 5px;
 }
 
 .detail-row .detail-label {
@@ -625,13 +636,13 @@ body {
 .close-button {
   background: linear-gradient(135deg, #bc9c22, #d4af37);
   color: white;
-  padding: 15px 50px;
-  font-size: 16px;
+  padding: 12px 40px;
+  font-size: 14px;
   font-weight: bold;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 15px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(188, 156, 34, 0.3);
 }
@@ -643,10 +654,64 @@ body {
 }
 
 .confirmation-note {
-  font-size: 13px;
+  font-size: 12px;
   color: #999;
-  margin-top: 20px;
+  margin-top: 15px;
   font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .thank-you-screen {
+    padding: 30px 25px;
+    max-width: 95%;
+  }
+
+  .thank-you-logo {
+    width: 80px;
+  }
+
+  .thank-you-company-name {
+    font-size: 18px;
+  }
+
+  .thank-you-title {
+    font-size: 24px;
+  }
+
+  .thank-you-message {
+    font-size: 13px;
+  }
+
+  .payment-details-box {
+    padding: 15px;
+  }
+
+  .detail-row {
+    font-size: 12px;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .detail-row.highlight {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .thank-you-screen {
+    padding: 25px 20px;
+  }
+
+  .thank-you-title {
+    font-size: 22px;
+  }
+
+  .close-button {
+    padding: 10px 30px;
+    font-size: 13px;
+  }
 }
 
 .footer-note {
