@@ -13,6 +13,7 @@ const elements = stripe.elements();
 
 // Create and mount the card element with UK-specific settings
 const cardElement = elements.create('card', {
+  hidePostalCode: true, // Hide the ZIP/postcode field from card element
   style: {
     base: {
       fontSize: '16px',
