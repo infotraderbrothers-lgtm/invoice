@@ -241,6 +241,9 @@ function handleSuccessfulPayment(transactionId) {
   paymentOverlay.classList.add('active');
   checkmarkContainer.style.display = 'flex';
   
+  // Send data to Make.com webhook
+  sendToMakeWebhook(transactionId);
+  
   // After 2 seconds, transition to thank you screen
   setTimeout(() => {
     checkmarkContainer.style.display = 'none';
@@ -258,4 +261,75 @@ function handleSuccessfulPayment(transactionId) {
     });
     document.getElementById('paymentDate').textContent = formattedDate;
   }, 2000);
+}
+
+// ========================================
+// MAKE.COM WEBHOOK INTEGRATION
+// ========================================
+async function sendToMakeWebhook(transactionId) {
+  const webhookUrl = 'https://hook.eu2.make.com/onj26mt12yawcmgl7la2bfxuheqdgxv4';
+  
+  // Get current date in UK format (DD/MM/YYYY)
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  
+  // Prepare webhook data - all fields sent separately (not nested)
+  const webhookData = {
+    // Company details (from invoice)
+    companyName: 'ABC Construction Ltd',
+    companyAddress: '123 High Street',
+    companyLocationCity: 'Edinburgh',
+    companyPostcode: 'EH1 1AA',
+    
+    // Invoice and receipt numbers
+    generatedNumber: '2025-001',
+    
+    // Dates
+    date: formattedDate,
+    invoiceDate: '06/12/2024',
+    
+    // Project details
+    projectName: 'Office Refurbishment',
+    milestonePayment: 'Milestone Payment 2 - Demolition & First Fix Complete',
+    
+    // Transaction details
+    id: transactionId,
+    
+    // Financial amounts (as strings without £ symbol for easier processing)
+    subtotal: '4602.16',
+    VAT: '920.43',
+    amount: '5522.59',
+    
+    // Additional useful fields
+    customerName: cardholderName.value,
+    customerEmail: cardholderEmail.value,
+    invoiceNumber: 'INV-2025-001',
+    receiptNumber: 'REC-2025-001',
+    paymentStatus: 'PAID'
+  };
+  
+  try {
+    console.log('📤 Sending payment data to Make.com webhook...');
+    
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(webhookData)
+    });
+    
+    if (response.ok) {
+      console.log('✅ Payment data successfully sent to Make.com');
+    } else {
+      console.warn('⚠️ Make.com webhook responded with status:', response.status);
+    }
+  } catch (error) {
+    console.error('❌ Error sending to Make.com webhook:', error);
+    // Don't stop the payment flow if webhook fails
+  }
 }
